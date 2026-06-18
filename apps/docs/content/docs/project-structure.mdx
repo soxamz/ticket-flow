@@ -1,0 +1,92 @@
+---
+title: Project Structure
+description: Understand how the monorepo is organized.
+---
+
+## Overview
+
+```
+next-turbo-starter/
+├── apps/
+│   ├── web/          # Main Next.js application
+│   └── docs/         # Documentation site (Fumadocs)
+├── packages/
+│   ├── ui/               # Shared React components (shadcn/ui)
+│   ├── biome-config/     # Shared Biome lint/format config
+│   └── typescript-config/ # Shared TypeScript presets
+├── turbo.json        # Turborepo task configuration
+├── biome.json        # Root Biome configuration
+├── package.json      # Root workspace configuration
+└── bun.lock          # Bun lockfile
+```
+
+## Apps
+
+### `apps/web`
+
+The main Next.js application. Uses the App Router with React Compiler enabled.
+
+- **Port:** 3000
+- **UI:** Imports components from `@repo/ui`
+- **Config:** `next.config.ts`, `tsconfig.json`, `biome.json`
+
+### `apps/docs`
+
+Documentation site powered by [Fumadocs](https://fumadocs.dev). Content is written in MDX files under `content/docs/`.
+
+- **Port:** 3001
+- **Content:** `content/docs/*.mdx`
+- **Config:** `source.config.ts` for Fumadocs collection setup
+
+## Packages
+
+### `packages/ui`
+
+Shared React component library built with [shadcn/ui](https://ui.shadcn.com). Components are exported directly from source (no build step needed).
+
+```tsx
+// Import in any app
+import { Button } from "@repo/ui/components/button";
+import { Card } from "@repo/ui/components/card";
+import { cn } from "@repo/ui/lib/utils";
+```
+
+### `packages/typescript-config`
+
+Shared TypeScript configurations:
+
+| Preset | Use case |
+| --- | --- |
+| `base.json` | Base config for all packages |
+| `nextjs.json` | Extends base for Next.js apps |
+| `react-library.json` | Extends base for React libraries |
+
+### `packages/biome-config`
+
+Shared [Biome](https://biomejs.dev) configurations for linting and formatting:
+
+| Preset | Use case |
+| --- | --- |
+| `base` | Core rules for all TypeScript code |
+| `next-js` | Adds Next.js and React rules |
+| `react-internal` | For internal React packages |
+
+## How Turborepo Connects Everything
+
+The root `turbo.json` defines task pipelines. When you run `bun run build`, Turborepo:
+
+1. Analyzes the dependency graph
+2. Builds packages first (`^build` dependency)
+3. Then builds apps in parallel
+4. Caches results for instant rebuilds
+
+```json
+{
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    }
+  }
+}
+```

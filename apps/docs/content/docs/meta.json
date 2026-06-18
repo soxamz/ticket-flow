@@ -1,0 +1,10 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "---Overview---",
+    "index",
+    "project-structure",
+    "---Reference---",
+    "ui-package"
+  ]
+}

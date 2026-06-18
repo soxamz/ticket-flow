@@ -1,0 +1,66 @@
+---
+title: Getting Started
+description: Set up and run the Next Turbo Starter template.
+---
+
+## Prerequisites
+
+- [Bun](https://bun.sh) v1.3+ (runtime and package manager)
+- [Node.js](https://nodejs.org) v18+ (required by Next.js)
+- [Git](https://git-scm.com)
+
+## Quick Start
+
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/your-username/next-turbo-starter.git
+cd next-turbo-starter
+bun install
+```
+
+Start all apps in development mode:
+
+```bash
+bun dev
+```
+
+This runs both apps simultaneously:
+
+| App  | URL                    | Description        |
+| ---- | ---------------------- | ------------------ |
+| web  | http://localhost:3000   | Main application   |
+| docs | http://localhost:3001   | Documentation site |
+
+## Run a Single App
+
+```bash
+bunx turbo run dev --filter=web
+bunx turbo run dev --filter=docs
+```
+
+## Available Scripts
+
+All scripts are run from the **root** of the monorepo:
+
+| Script          | Description                              |
+| --------------- | ---------------------------------------- |
+| `bun dev`       | Start all apps in development mode       |
+| `bun run build` | Build all apps and packages              |
+| `bun run lint`  | Lint all apps and packages with Biome    |
+| `bun run format`| Format all files with Biome              |
+| `bun run typecheck` | Run TypeScript type checking         |
+
+## Environment Variables
+
+Create `.env.local` files inside each app that needs them:
+
+```bash
+# apps/docs/.env.local
+NEXT_PUBLIC_SITE_URL=https://docs.example.com
+NEXT_PUBLIC_GITHUB_REPO=your-username/next-turbo-starter
+```
+
+> [!NOTE]
+> Environment files live **inside each app**, not at the monorepo root.
+> This follows Turborepo best practices for cache correctness.

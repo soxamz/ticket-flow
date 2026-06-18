@@ -1,0 +1,110 @@
+---
+title: UI Package
+description: Using the shared component library across apps.
+---
+
+## Overview
+
+The `@repo/ui` package is a shared React component library built on [shadcn/ui](https://ui.shadcn.com). It provides accessible, customizable components that work across all apps in the monorepo.
+
+## Available Components
+
+### Button
+
+A versatile button component with multiple variants and sizes.
+
+```tsx
+import { Button } from "@repo/ui/components/button";
+
+export function Example() {
+  return (
+    <div className="flex gap-2">
+      <Button>Default</Button>
+      <Button variant="secondary">Secondary</Button>
+      <Button variant="outline">Outline</Button>
+      <Button variant="ghost">Ghost</Button>
+      <Button variant="destructive">Destructive</Button>
+      <Button variant="link">Link</Button>
+    </div>
+  );
+}
+```
+
+**Props:**
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `default \| secondary \| outline \| ghost \| destructive \| link` | `default` | Visual style |
+| `size` | `default \| xs \| sm \| lg \| icon` | `default` | Size preset |
+| `asChild` | `boolean` | `false` | Merge props onto child element |
+
+### Card
+
+A composable card component for grouping related content.
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@repo/ui/components/card";
+import { Button } from "@repo/ui/components/button";
+
+export function Example() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Card Title</CardTitle>
+        <CardDescription>A short description of the card.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p>Card body content goes here.</p>
+      </CardContent>
+      <CardFooter>
+        <Button>Action</Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+## Utilities
+
+### `cn()` — Class Name Merger
+
+Combines Tailwind CSS classes with proper conflict resolution:
+
+```tsx
+import { cn } from "@repo/ui/lib/utils";
+
+// Merges classes, resolving conflicts
+cn("px-4 py-2", "px-8"); // → "py-2 px-8"
+cn("text-red-500", condition && "text-blue-500");
+```
+
+## Adding New Components
+
+Use the shadcn CLI from the `packages/ui` directory:
+
+```bash
+cd packages/ui
+bunx shadcn@latest add dialog
+```
+
+Components are installed into `src/components/` and automatically exported via the package's `exports` field.
+
+## How It Works
+
+The UI package uses a **JIT (Just-In-Time) compilation** strategy — components are compiled by the consuming app's bundler, not pre-built. This is configured via `transpilePackages` in each app's `next.config.ts`:
+
+```ts
+// apps/web/next.config.ts
+const nextConfig: NextConfig = {
+  transpilePackages: ["@repo/ui"],
+};
+```
+
+The CSS theme tokens are defined in `packages/ui/src/styles/globals.css` and imported by each app's root layout.
