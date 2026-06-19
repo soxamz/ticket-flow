@@ -16,6 +16,26 @@ dotenv.config();
 const PORT = Number(process.env.PORT) || 4000;
 const MONGODB_URI = process.env.MONGODB_URI;
 
+function parseOrigins(value?: string): string[] {
+  if (!value) {
+    return [];
+  }
+
+  return value
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
+const allowedOrigins = Array.from(
+  new Set([
+    "http://localhost:3000",
+    "http://localhost:3002",
+    ...parseOrigins(process.env.FRONTEND_ORIGINS),
+    ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+  ]),
+);
+
 if (!MONGODB_URI) {
   throw new Error("MONGODB_URI is not configured");
 }
@@ -28,7 +48,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3002"],
+    origin: allowedOrigins,
     credentials: true,
   }),
 );
