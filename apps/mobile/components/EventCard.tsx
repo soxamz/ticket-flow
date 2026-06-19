@@ -1,7 +1,7 @@
+import { Ionicons } from "@expo/vector-icons";
 import type { Event } from "@repo/types";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { Calendar, MapPin, Ticket } from "lucide-react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface EventCardProps {
@@ -40,11 +40,11 @@ export function EventCard({ event }: EventCardProps) {
 
         <View style={styles.meta}>
           <View style={styles.metaRow}>
-            <Calendar size={13} color="#888" />
+            <Ionicons name="calendar-outline" size={13} color="#888" />
             <Text style={styles.metaText}>{formattedDate}</Text>
           </View>
           <View style={styles.metaRow}>
-            <MapPin size={13} color="#888" />
+            <Ionicons name="location-outline" size={13} color="#888" />
             <Text style={styles.metaText} numberOfLines={1}>
               {event.venue}, {event.city}
             </Text>
@@ -53,7 +53,7 @@ export function EventCard({ event }: EventCardProps) {
 
         <View style={styles.footer}>
           <View style={styles.metaRow}>
-            <Ticket size={13} color={event.availableSeats > 0 ? "#22c55e" : "#ef4444"} />
+            <Ionicons name="ticket-outline" size={13} color={event.availableSeats > 0 ? "#22c55e" : "#ef4444"} />
             <Text style={[styles.seatsText, { color: event.availableSeats > 0 ? "#22c55e" : "#ef4444" }]}>
               {event.availableSeats > 0 ? `${event.availableSeats} seats left` : "Sold out"}
             </Text>
