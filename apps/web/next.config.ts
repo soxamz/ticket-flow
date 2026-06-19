@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactCompiler: true,
   transpilePackages: ["@repo/ui", "better-auth"],
+  serverExternalPackages: ["@react-pdf/renderer"],
   images: {
     remotePatterns: [
       {

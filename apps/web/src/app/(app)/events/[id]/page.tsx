@@ -2,12 +2,6 @@
 
 import type { EventDetail, Seat } from "@repo/types";
 import { Alert, AlertDescription, AlertTitle } from "@repo/ui/components/alert";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@repo/ui/components/card";
 import { Skeleton } from "@repo/ui/components/skeleton";
 import { AlertCircle } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -119,16 +113,8 @@ export default function EventDetailPage() {
     <div className="space-y-6">
       <PageHeader title={event.name} description={event.venue} />
 
-      <div>
-        <SeatMapLegend />
-        <div className="border-2 mt-4 border-primary border-dashed rounded-xl shadow-inner">
-          <SeatMap
-            seats={seats}
-            selected={selected}
-            onToggleSeat={toggleSeat}
-          />
-        </div>
-      </div>
+      <SeatMapLegend />
+      <SeatMap seats={seats} selected={selected} onToggleSeat={toggleSeat} />
 
       <StickyActionBar
         summary={

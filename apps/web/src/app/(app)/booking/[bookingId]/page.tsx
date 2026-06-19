@@ -2,22 +2,24 @@
 
 import type { BookingDetail } from "@repo/types";
 import { Alert, AlertDescription, AlertTitle } from "@repo/ui/components/alert";
-import { Button } from "@repo/ui/components/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/card";
-import { Separator } from "@repo/ui/components/separator";
+import { RainbowButton } from "@repo/ui/components/rainbow-button";
 import { Skeleton } from "@repo/ui/components/skeleton";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { BookingSummaryCard } from "@/components/BookingSummaryCard";
-import { PageHeader } from "@/components/PageHeader";
+import { BookingSteps } from "@/components/booking/booking-steps";
+import { DownloadTicketButton } from "@/components/booking/download-ticket-button";
 import { api } from "@/lib/api";
+import { formatBookedAt } from "@/lib/format";
 
 function BookingContent() {
   const params = useParams<{ bookingId: string }>();
@@ -61,27 +63,39 @@ function BookingContent() {
 
   if (isExpiredFlow) {
     return (
-      <div className="mx-auto max-w-lg space-y-6">
-        <Alert variant="destructive">
-          <AlertCircle />
-          <AlertTitle>Seats no longer available</AlertTitle>
-          <AlertDescription>
-            Your reservation expired before the booking could be confirmed. The
-            seats may have been released back to other users.
-          </AlertDescription>
-        </Alert>
-        <Button asChild className="w-full" size="lg">
+      <div className="mx-auto max-w-xl space-y-6 pb-8">
+        <BookingSteps current="hold" />
+
+        <Card className="border-destructive/30 bg-linear-to-b from-destructive/10 via-card to-card">
+          <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
+            <div className="flex size-16 items-center justify-center rounded-full bg-destructive/15 ring-4 ring-destructive/20">
+              <AlertCircle className="size-8 text-destructive" aria-hidden />
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-balance font-semibold text-2xl">
+                Seats no longer available
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                Your reservation expired before checkout finished. Those seats
+                may already be open for other guests.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <RainbowButton asChild size="lg" className="w-full">
           <Link href="/">Choose different seats</Link>
-        </Button>
+        </RainbowButton>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-lg space-y-6">
-        <Skeleton className="mx-auto size-16 rounded-full" />
-        <Skeleton className="h-40 w-full" />
+      <div className="mx-auto max-w-xl space-y-6">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-32 w-full rounded-xl" />
+        <Skeleton className="h-56 w-full rounded-xl" />
       </div>
     );
   }
@@ -97,14 +111,30 @@ function BookingContent() {
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
-      <div className="flex flex-col items-center gap-3 text-center">
-        <CheckCircle2 className="size-16 text-primary" />
-        <PageHeader
-          title="Booking confirmed"
-          description={`Reference: ${bookingId}`}
-        />
-      </div>
+    <div className="mx-auto max-w-xl space-y-6 pb-8">
+      <BookingSteps current="confirm" />
+
+      <Card className="overflow-hidden border-primary/25 bg-linear-to-br from-primary/15 via-card to-violet-950/30 shadow-sm">
+        <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
+          <div className="flex size-16 items-center justify-center rounded-full bg-primary/15 ring-4 ring-primary/20">
+            <CheckCircle2 className="size-8 text-primary" aria-hidden />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-balance font-semibold text-2xl tracking-tight">
+              Booking confirmed
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Reference{" "}
+              <span
+                className="font-mono text-foreground tabular-nums"
+                translate="no"
+              >
+                {bookingId}
+              </span>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       <BookingSummaryCard
         eventName={booking.event.name}
@@ -113,36 +143,42 @@ function BookingContent() {
         seatNumbers={booking.seatNumbers}
       />
 
-      <Card>
-        <CardHeader>
+      <Card className="border-border/60 bg-card/80">
+        <CardHeader className="pb-2">
           <CardTitle className="text-base">Ticket details</CardTitle>
+          <CardDescription>
+            Booked on {formatBookedAt(booking.bookedAt)}
+          </CardDescription>
         </CardHeader>
-        <CardContent className="text-muted-foreground text-sm">
-          Booked on{" "}
-          {new Date(booking.bookedAt).toLocaleString(undefined, {
-            dateStyle: "medium",
-            timeStyle: "short",
-          })}
+        <CardContent>
+          <p className="text-muted-foreground text-sm">
+            Show this confirmation or your downloaded PDF at the venue entrance.
+          </p>
         </CardContent>
       </Card>
 
-      <Separator />
-
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Button variant="outline" disabled className="flex-1">
-          Download ticket
-        </Button>
-        <Button asChild className="flex-1">
-          <Link href="/">Back to events</Link>
-        </Button>
-      </div>
+      <Card className="border-primary/20 bg-linear-to-r from-primary/10 via-card to-violet-950/20 shadow-sm">
+        <CardContent className="flex flex-col gap-3 py-4 sm:flex-row">
+          <DownloadTicketButton bookingId={bookingId} />
+          <RainbowButton asChild size="lg" className="flex-1">
+            <Link href="/">Back to events</Link>
+          </RainbowButton>
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
 export default function BookingPage() {
   return (
-    <Suspense fallback={<Skeleton className="mx-auto h-40 max-w-lg" />}>
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-xl space-y-6">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-40 w-full rounded-xl" />
+        </div>
+      }
+    >
       <BookingContent />
     </Suspense>
   );

@@ -3,13 +3,21 @@
 import type { ReservationDetail } from "@repo/types";
 import { Alert, AlertDescription, AlertTitle } from "@repo/ui/components/alert";
 import { Button } from "@repo/ui/components/button";
-import { Separator } from "@repo/ui/components/separator";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/card";
+import { RainbowButton } from "@repo/ui/components/rainbow-button";
 import { Skeleton } from "@repo/ui/components/skeleton";
 import { AlertCircle, Clock } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { BookingSummaryCard } from "@/components/BookingSummaryCard";
+import { BookingSteps } from "@/components/booking/booking-steps";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { PageHeader } from "@/components/PageHeader";
 import { api, isExpiredError } from "@/lib/api";
@@ -76,7 +84,10 @@ function ReservationContent() {
         router.push(`/booking/${reservationId}?expired=1`);
       } else {
         toast.error("Booking failed", {
-          description: err instanceof Error ? err.message : "Please try again",
+          description:
+            err instanceof Error
+              ? err.message
+              : "Try confirming again or choose different seats.",
         });
       }
     } finally {
@@ -90,7 +101,9 @@ function ReservationContent() {
       await api.cancelReservation(reservationId);
       router.push("/");
     } catch {
-      toast.error("Failed to cancel reservation");
+      toast.error("Failed to cancel reservation", {
+        description: "Refresh the page and try again.",
+      });
     } finally {
       setCancelling(false);
     }
@@ -98,9 +111,10 @@ function ReservationContent() {
 
   if (loading && !reservation) {
     return (
-      <div className="mx-auto max-w-lg space-y-6">
-        <Skeleton className="mx-auto h-16 w-32" />
-        <Skeleton className="h-40 w-full" />
+      <div className="mx-auto max-w-xl space-y-6">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-32 w-full rounded-xl" />
+        <Skeleton className="h-56 w-full rounded-xl" />
       </div>
     );
   }
@@ -116,26 +130,41 @@ function ReservationContent() {
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
+    <div className="mx-auto max-w-xl space-y-6 pb-8">
+      <BookingSteps current="hold" />
+
       <PageHeader
-        title="Hold Seats"
-        description="Complete your booking before the timer expires"
+        title="Hold seats"
+        description="Review your selection and confirm before the timer runs out."
       />
 
-      <div className="flex flex-col items-center gap-2 rounded-lg border bg-card p-6 text-center">
-        <Clock className="size-5 text-muted-foreground" />
-        <CountdownTimer
-          expiresAt={expiresAt}
-          onExpire={() => setExpired(true)}
-        />
-      </div>
+      <Card className="overflow-hidden border-primary/25 bg-linear-to-b from-primary/10 via-card to-violet-950/20 shadow-sm">
+        <CardHeader className="pb-2 text-center">
+          <div className="mx-auto flex items-center gap-2 text-muted-foreground text-sm">
+            <Clock className="size-4 shrink-0" aria-hidden />
+            <CardTitle className="font-medium text-base">
+              Time remaining
+            </CardTitle>
+          </div>
+          <CardDescription>
+            Your seats are held temporarily while you complete checkout.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center pb-8">
+          <CountdownTimer
+            expiresAt={expiresAt}
+            onExpire={() => setExpired(true)}
+          />
+        </CardContent>
+      </Card>
 
       {expired ? (
         <Alert variant="destructive">
           <AlertCircle />
           <AlertTitle>Reservation expired</AlertTitle>
           <AlertDescription>
-            Your hold has expired. Please select seats again.
+            Your hold has expired. Return to the event page to select seats
+            again.
           </AlertDescription>
         </Alert>
       ) : null}
@@ -147,33 +176,41 @@ function ReservationContent() {
         seatNumbers={reservation.seatNumbers}
       />
 
-      <Separator />
-
-      <div className="flex flex-col gap-3">
-        <Button
-          onClick={handleConfirm}
-          disabled={expired || confirming}
-          size="lg"
-          className="w-full"
-        >
-          {confirming ? "Confirming..." : "Confirm Booking"}
-        </Button>
-        <Button
-          variant="ghost"
-          onClick={handleCancel}
-          disabled={cancelling}
-          className="w-full"
-        >
-          {cancelling ? "Cancelling..." : "Cancel reservation"}
-        </Button>
-      </div>
+      <Card className="border-primary/20 bg-linear-to-r from-primary/10 via-card to-violet-950/20 shadow-sm">
+        <CardContent className="flex flex-col gap-3 py-4">
+          <RainbowButton
+            onClick={handleConfirm}
+            disabled={expired || confirming}
+            size="lg"
+            className="w-full"
+          >
+            {confirming ? "Confirming…" : "Confirm booking"}
+          </RainbowButton>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleCancel}
+            disabled={cancelling}
+            className="w-full"
+          >
+            {cancelling ? "Cancelling…" : "Release seats"}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
 export default function ReservationPage() {
   return (
-    <Suspense fallback={<Skeleton className="mx-auto h-40 max-w-lg" />}>
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-xl space-y-6">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-40 w-full rounded-xl" />
+        </div>
+      }
+    >
       <ReservationContent />
     </Suspense>
   );

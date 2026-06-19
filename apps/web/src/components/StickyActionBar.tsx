@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@repo/ui/components/button";
 import { Card, CardContent } from "@repo/ui/components/card";
+import { RainbowButton } from "@repo/ui/components/rainbow-button";
 import type { ReactNode } from "react";
 
 interface StickyActionBarProps {
@@ -20,15 +20,17 @@ export function StickyActionBar({
   loading = false,
 }: StickyActionBarProps) {
   return (
-    <div className="p-4">
-      <Card className="mx-auto max-w-6xl shadow-lg">
-        <CardContent className="flex items-center justify-between gap-4 py-4">
-          <div className="text-sm">{summary}</div>
-          <Button onClick={onAction} disabled={disabled || loading} size="lg">
-            {loading ? "Please wait..." : actionLabel}
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+    <Card className="border-primary/20 bg-linear-to-r from-primary/15 via-card to-violet-950/30 shadow-lg">
+      <CardContent className="flex items-center justify-between gap-4 py-4">
+        <div className="text-sm">{summary}</div>
+        <RainbowButton
+          onClick={onAction}
+          disabled={disabled || loading}
+          size="lg"
+        >
+          {loading ? "Please wait…" : actionLabel}
+        </RainbowButton>
+      </CardContent>
+    </Card>
   );
 }

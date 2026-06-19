@@ -21,6 +21,17 @@ export function CountdownTimer({ expiresAt, onExpire }: CountdownTimerProps) {
       Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000),
     ),
   );
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    function update() {
+      setReduceMotion(mediaQuery.matches);
+    }
+    update();
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     const tick = () => {
@@ -41,14 +52,22 @@ export function CountdownTimer({ expiresAt, onExpire }: CountdownTimerProps) {
 
   const isUrgent = secondsLeft > 0 && secondsLeft <= 120;
   const isExpired = secondsLeft === 0;
+  const label = isExpired
+    ? "Reservation expired"
+    : `Time remaining: ${formatTime(secondsLeft)}`;
 
   return (
     <div
+      role="timer"
+      aria-live="polite"
+      aria-atomic="true"
+      aria-label={label}
       className={cn(
-        "font-mono text-5xl font-bold tracking-widest",
+        "font-mono text-5xl font-bold tabular-nums tracking-widest motion-safe:transition-colors",
         isExpired && "text-destructive",
         isUrgent && !isExpired && "text-destructive/80",
         !isUrgent && !isExpired && "text-primary",
+        reduceMotion && isUrgent && !isExpired && "animate-pulse",
       )}
     >
       {formatTime(secondsLeft)}
