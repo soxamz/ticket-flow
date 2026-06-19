@@ -1,5 +1,15 @@
+import type { Metadata } from "next";
 import { AppHeader } from "@/components/AppHeader";
 import { AuthGuard } from "@/components/AuthGuard";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Dashboard",
+    template: "%s | TicketFlow",
+  },
+  description:
+    "Browse events, reserve seats, and manage your TicketFlow bookings.",
+};
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -1,7 +1,16 @@
 import { HexagonPattern } from "@repo/ui/components/hexagon-pattern";
 import { cn } from "@repo/ui/lib/utils";
+import type { Metadata } from "next";
 import Image from "next/image";
 import type { ReactNode } from "react";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Account access",
+    template: "%s | TicketFlow",
+  },
+  description: "Sign in or create a TicketFlow account to manage bookings.",
+};
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
