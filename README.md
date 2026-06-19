@@ -1,127 +1,97 @@
-# Next Turbo Starter
+# TicketFlow
 
-A clean, modern, production-ready monorepo template built with **Turborepo**, **Next.js**, **Bun**, **Fumadocs**, **Biome**, and **shadcn/ui**.
+A full-stack event ticket booking application with seat reservation and booking confirmation. Built as a Bun monorepo with a Next.js frontend and Express + MongoDB backend.
 
-Clone it and start building immediately.
+## Prerequisites
 
-## ✨ Features
+- [Bun](https://bun.sh) 1.3+
+- [MongoDB](https://www.mongodb.com/) running locally or a remote Atlas URI
 
-- ⚡ **Turborepo** — Incremental builds, parallel execution, smart caching
-- 🚀 **Next.js 16** — App Router, React Compiler, Server Components, React 19
-- 📦 **Bun** — Fast runtime and package manager
-- 🎨 **shadcn/ui** — Accessible component library shared across apps
-- 📝 **Fumadocs** — Beautiful documentation site with MDX
-- 🔧 **Biome** — Unified linting and formatting
-- 🪝 **Husky + lint-staged** — Pre-commit quality gates
-- 📏 **Commitlint** — Conventional commit enforcement
-
-## 📁 Project Structure
-
-```
-next-turbo-starter/
-├── apps/
-│   ├── web/                  # Main Next.js application (port 3000)
-│   └── docs/                 # Documentation site — Fumadocs (port 3001)
-├── packages/
-│   ├── ui/                   # Shared React components (shadcn/ui)
-│   ├── biome-config/         # Shared Biome configuration
-│   └── typescript-config/    # Shared TypeScript presets
-├── turbo.json                # Turborepo task pipelines
-├── biome.json                # Root Biome config
-└── package.json              # Workspace root
-```
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- [Bun](https://bun.sh) v1.3+
-- [Node.js](https://nodejs.org) v18+
-
-### Setup
+## Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/next-turbo-starter.git
-cd next-turbo-starter
-
-# Install dependencies
 bun install
-
-# Start development
-bun dev
 ```
 
-Both apps will be available:
-- **Web app:** http://localhost:3000
-- **Docs:** http://localhost:3001
+## Environment variables
 
-### Run a single app
+### Backend (`apps/server/.env`)
+
+```env
+PORT=4000
+MONGODB_URI=mongodb://localhost:27017/ticketflow
+JWT_SECRET=your_jwt_secret_here
+```
+
+### Frontend (`apps/web/.env.local`)
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:4000
+```
+
+## Running the app
+
+### Seed the database
 
 ```bash
-bunx turbo run dev --filter=web
-bunx turbo run dev --filter=docs
+cd apps/server
+bun run seed
 ```
 
-## 📜 Scripts
-
-| Script               | Description                              |
-| -------------------- | ---------------------------------------- |
-| `bun dev`            | Start all apps in development mode       |
-| `bun run build`      | Build all apps and packages              |
-| `bun run lint`       | Lint all code with Biome                 |
-| `bun run format`     | Format all code with Biome               |
-| `bun run typecheck`  | Run TypeScript type checking             |
-
-## 🎨 Using the UI Package
-
-Components from `@repo/ui` are shared across all apps:
-
-```tsx
-import { Button } from "@repo/ui/components/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@repo/ui/components/card";
-import { cn } from "@repo/ui/lib/utils";
-```
-
-Add new shadcn/ui components:
+### Start the backend
 
 ```bash
-cd packages/ui
-bunx shadcn@latest add <component-name>
+cd apps/server
+bun run dev
 ```
 
-## 🌍 Environment Variables
+Server runs at `http://localhost:4000`.
 
-Environment files live inside each app (not at the root):
+### Start the frontend
 
 ```bash
-# apps/docs/.env.local
-NEXT_PUBLIC_SITE_URL=https://docs.example.com
-NEXT_PUBLIC_GITHUB_REPO=your-username/next-turbo-starter
+cd apps/web
+bun run dev
 ```
 
-See `apps/docs/.env.example` for all available variables.
+App runs at `http://localhost:3000`.
 
-## 🚢 Deployment
+From the repo root you can also run `bun run dev` to start all apps via Turborepo.
 
-### Vercel (Recommended)
+## Project structure
 
-Each app can be deployed as a separate Vercel project. Set the **Root Directory** to `apps/web` or `apps/docs` in your Vercel project settings.
-
-### Other Platforms
-
-Build the apps with:
-
-```bash
-bun run build
+```
+apps/
+  web/       Next.js 16 frontend (App Router)
+  server/    Express + Mongoose API
+packages/
+  types/     Shared TypeScript interfaces
+  ui/        Shared shadcn/ui components
 ```
 
-The output will be in each app's `.next/` directory.
+## Design decisions
 
-## 🤝 Contributing
+### Preventing double booking
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+Seat updates use MongoDB transactions with conditional `findOneAndUpdate` filters (`status: 'available'` when reserving, `status: 'reserved'` when booking). If any seat in a batch fails the condition, the entire transaction aborts and the client receives a `409` with the list of failed seats.
 
-## 📄 License
+### Expired reservations
 
-[MIT](./LICENSE)
+Two mechanisms work together:
+
+1. **TTL index** on `Reservation.expiresAt` with `expireAfterSeconds: 0` removes expired reservation documents automatically.
+2. **Cron job** (every minute) finds expired reservations, resets their seats from `reserved` back to `available`, then deletes the reservation. This handles seat status cleanup when the TTL index removes documents without updating seats.
+
+### Next.js App Router + separate Express server
+
+The frontend uses Next.js 16 for UI, routing, and client-side state. The backend is a standalone Express API so booking logic, MongoDB transactions, and cron jobs live in one Node process without coupling to the Next.js runtime. Communication is REST over HTTP with JWT auth.
+
+### Authentication
+
+Users register and login via the Express API. Passwords are hashed with bcrypt; the API returns a JWT. The frontend stores the token in `localStorage` and sends `Authorization: Bearer <token>` on protected requests. Protected pages redirect to `/login` when no token is present.
+
+## Notes
+
+- This project uses **Next.js 16** and **Biome** for linting (the hiring spec referenced Next.js 14 and ESLint).
+- Ticket price is a flat **₹400 per seat**, calculated on the client.
+- The `Download ticket` button on the confirmation page is a placeholder.

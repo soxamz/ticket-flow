@@ -1,0 +1,45 @@
+# Panery - Cursor indexing exclusions
+# Syntax: same as .gitignore. Blocks indexing AND @-mentions for matched paths.
+# After editing: Command Palette -> "Cursor: Resync Index" (or restart Cursor).
+
+# Dependencies & build outputs (largest on-disk trees; ~100k+ files)
+node_modules/
+**/node_modules/
+.pnp/
+.pnp.js
+.next/
+out/
+build/
+dist/
+.vercel/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# VCS & package manager caches
+.git/
+.husky/_/
+
+# Lockfiles (large, low signal for AI)
+bun.lock
+bun.lockb
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Agent skill packs (218+ tracked files; injected via workspace rules, not search)
+.agents/skills/
+!.agents/context/
+
+# Prompt / reference datasets (CSV dumps, not app source)
+.github/prompts/
+
+# Secrets & local env
+!.env.*.example
+.clerk/
+
+# Generated / minified artifacts
+*.min.js
+*.min.css
+*.map
+*.bundle.js
