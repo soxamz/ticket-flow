@@ -50,6 +50,13 @@ export interface BookingDetail extends Booking {
   event: Pick<Event, "name" | "date" | "venue">;
 }
 
+export interface UserBooking extends Booking {
+  event: Pick<
+    Event,
+    "name" | "date" | "venue" | "city" | "category" | "imageUrl"
+  >;
+}
+
 export interface AuthResponse {
   token: string;
   userId: string;

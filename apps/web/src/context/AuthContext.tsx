@@ -6,6 +6,8 @@ import { authClient, BEARER_TOKEN_KEY } from "@/lib/auth-client";
 interface AuthState {
   userId: string;
   email: string;
+  name: string;
+  createdAt: string | null;
   role: "user" | "admin";
 }
 
@@ -30,6 +32,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return {
       userId: session.user.id,
       email: session.user.email,
+      name: session.user.name,
+      createdAt:
+        typeof session.user.createdAt === "string"
+          ? session.user.createdAt
+          : session.user.createdAt instanceof Date
+            ? session.user.createdAt.toISOString()
+            : null,
       role:
         (session.user as { role?: string }).role === "admin" ? "admin" : "user",
     };

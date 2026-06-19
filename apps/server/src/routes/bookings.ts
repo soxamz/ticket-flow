@@ -300,6 +300,54 @@ bookingsRouter.post("/", authMiddleware, async (req, res) => {
   }
 });
 
+bookingsRouter.get("/", authMiddleware, async (req, res) => {
+  const userId = req.user?.userId;
+
+  if (!userId) {
+    res.status(401).json({ message: "Unauthorized" });
+    return;
+  }
+
+  const bookings = await Booking.find({ userId })
+    .sort({ bookedAt: -1 })
+    .populate("eventId", "name date venue city category imageUrl");
+
+  const items = bookings
+    .map((booking) => {
+      const populatedEvent = booking.eventId as unknown as {
+        _id: mongoose.Types.ObjectId;
+        name: string;
+        date: Date;
+        venue: string;
+        city: string;
+        category: string;
+        imageUrl?: string;
+      };
+
+      if (!populatedEvent?.name) {
+        return null;
+      }
+
+      return {
+        _id: booking._id.toString(),
+        eventId: populatedEvent._id.toString(),
+        seatNumbers: booking.seatNumbers,
+        bookedAt: booking.bookedAt.toISOString(),
+        event: {
+          name: populatedEvent.name,
+          date: populatedEvent.date.toISOString(),
+          venue: populatedEvent.venue,
+          city: populatedEvent.city,
+          category: populatedEvent.category,
+          imageUrl: populatedEvent.imageUrl,
+        },
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+
+  res.json(items);
+});
+
 bookingsRouter.get("/:id", authMiddleware, async (req, res) => {
   const id = getRouteParam(req.params.id);
   const userId = req.user?.userId;

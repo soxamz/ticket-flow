@@ -36,9 +36,9 @@ export function AppHeader() {
                 <Link href="/admin">Admin</Link>
               </Button>
             ) : null}
-            <span className="hidden text-muted-foreground text-sm sm:inline">
-              {user.email}
-            </span>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/account">Account</Link>
+            </Button>
             <Separator orientation="vertical" className="hidden h-4 sm:block" />
             <Button variant="outline" size="sm" onClick={handleLogout}>
               Logout

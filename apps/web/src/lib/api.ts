@@ -13,6 +13,7 @@ import type {
   ReserveResponse,
   Seat,
   UpdateEventInput,
+  UserBooking,
 } from "@repo/types";
 import { BEARER_TOKEN_KEY } from "@/lib/auth-client";
 
@@ -124,6 +125,10 @@ export const api = {
 
   getBooking(id: string) {
     return request<BookingDetail>(`/api/bookings/${id}`, {}, true);
+  },
+
+  getMyBookings() {
+    return request<UserBooking[]>("/api/bookings", {}, true);
   },
 
   getAdminStats() {

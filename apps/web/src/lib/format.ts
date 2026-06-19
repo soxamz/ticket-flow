@@ -12,3 +12,10 @@ export function formatBookedAt(date: string): string {
     timeStyle: "short",
   }).format(new Date(date));
 }
+
+export function formatMemberSince(date: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    month: "long",
+    year: "numeric",
+  }).format(new Date(date));
+}
