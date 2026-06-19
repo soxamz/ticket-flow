@@ -1,0 +1,103 @@
+---
+title: Frontend Architecture
+description: How the Next.js app is organized, authenticated, and rendered.
+---
+
+## Overview
+
+The frontend lives in `apps/web` and uses Next.js App Router.
+
+Core responsibilities:
+
+- user and admin UI
+- auth forms and session state
+- event search and seat selection
+- reservation/booking completion
+- PDF ticket retrieval
+
+## Route Groups
+
+Top-level route organization:
+
+- `(landing)` public marketing pages
+- `(auth)` login and registration
+- `dashboard` authenticated user app
+- `admin` admin-only management panel
+
+Compatibility redirects also exist for legacy URLs:
+
+- `/account` -> `/dashboard/account`
+- `/events/[id]` -> `/dashboard/events/[id]`
+- `/booking/[bookingId]` -> `/dashboard/booking/[bookingId]`
+- `/reservation/[reservationId]` -> `/dashboard/reservation/[reservationId]`
+
+## State and Auth
+
+Auth state is managed in:
+
+- `apps/web/src/context/AuthContext.tsx`
+
+Data sources:
+
+1. Better Auth React client session (`useSession()`)
+2. Bearer-token fallback session check for cross-domain deployments
+
+This ensures dashboard access works even when cookie-only session checks are delayed in production.
+
+## API Integration
+
+Client API wrapper is in:
+
+- `apps/web/src/lib/api.ts`
+
+Behavior:
+
+- base URL from `NEXT_PUBLIC_API_URL`
+- optional bearer token from local storage
+- typed responses via `@repo/types`
+- centralized error throwing (`ApiError`)
+
+## UI Layer
+
+The web app consumes shared components from `@repo/ui`.
+
+Examples:
+
+- form and auth cards
+- dashboard cards and alerts
+- admin tables and controls
+- skeleton loaders and empty states
+
+Theme:
+
+- runtime dark/light mode via `next-themes`
+- tokenized styling from `@repo/ui/globals.css`
+
+## Guards and Access Control
+
+Client route protection:
+
+- `AuthGuard` for signed-in user routes
+- `AdminGuard` for admin route tree
+
+If session is missing, users are redirected to `/login?redirect=<path>`.
+
+## Metadata and Loading UX
+
+Metadata is defined at:
+
+- root layout (`app/layout.tsx`)
+- section layouts (`(landing)`, `(auth)`, `dashboard`, `admin`)
+- targeted nested layouts for page-type titles
+
+Global loading state:
+
+- `app/loading.tsx`
+
+## Performance-Oriented Practices Used
+
+- route-group based layout composition
+- typed API boundaries shared across frontend/backend
+- reusable UI package to reduce duplication
+- suspense boundaries for auth and async pages
+- redirect aliases to prevent broken bookmarked URLs

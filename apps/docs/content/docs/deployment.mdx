@@ -1,0 +1,89 @@
+---
+title: Deployment
+description: Production deployment setup for Render (backend) and Vercel (frontend).
+---
+
+## Recommended Production Topology
+
+- Backend API: Render (`apps/server`)
+- Frontend app: Vercel (`apps/web`)
+- Database: MongoDB Atlas
+
+## Backend Deployment (Render)
+
+Service type:
+
+- Web Service
+
+Build command:
+
+```bash
+bun install --frozen-lockfile
+```
+
+Start command:
+
+```bash
+bun --filter server start
+```
+
+Health check path:
+
+```text
+/health
+```
+
+### Required Render env vars
+
+- `MONGODB_URI`
+- `BETTER_AUTH_SECRET`
+- `BETTER_AUTH_URL` (Render backend URL)
+- `FRONTEND_URL` (Vercel frontend URL)
+
+Optional:
+
+- `FRONTEND_ORIGINS` (comma-separated additional origins)
+- OAuth provider credentials
+
+## Frontend Deployment (Vercel)
+
+Project settings:
+
+- Framework: Next.js
+- Root Directory: `apps/web`
+
+Required env var:
+
+- `NEXT_PUBLIC_API_URL` (Render backend URL)
+
+Optional:
+
+- `NEXT_PUBLIC_SITE_URL` (primary website URL for metadata)
+
+## Critical Cross-Service Consistency
+
+These URLs must match exactly across services:
+
+1. backend `BETTER_AUTH_URL`
+2. backend allowed frontend origins
+3. frontend `NEXT_PUBLIC_API_URL`
+
+Mismatch usually causes:
+
+- login succeeds but dashboard redirects back to login
+- session lookup failure in production
+
+## Post-Deploy Smoke Tests
+
+1. Register a new user.
+2. Sign in and ensure redirect to `/dashboard`.
+3. Reserve and confirm a booking.
+4. Open `/dashboard/account` and verify booking history.
+5. Test admin routes with admin user.
+
+## Security Checklist
+
+- rotate leaked credentials immediately
+- store secrets only in platform env vars
+- do not commit real `.env.local` values
+- use separate dev/staging/prod credentials

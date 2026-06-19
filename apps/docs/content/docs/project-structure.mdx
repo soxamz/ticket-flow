@@ -1,36 +1,104 @@
 ---
 title: Project Structure
-description: Understand how the monorepo is organized.
+description: Understand how TicketFlow is organized across apps and shared packages.
 ---
 
-## Overview
+## Monorepo Layout
 
 ```
-next-turbo-starter/
+ticket-flow/
 ├── apps/
-│   ├── web/          # Main Next.js application
-│   └── docs/         # Documentation site (Fumadocs)
+│   ├── web/            # Customer + admin web app (Next.js)
+│   ├── server/         # Express API + auth + jobs
+│   └── docs/           # Documentation site (Fumadocs)
 ├── packages/
-│   ├── ui/               # Shared React components (shadcn/ui)
-│   ├── biome-config/     # Shared Biome lint/format config
-│   └── typescript-config/ # Shared TypeScript presets
-├── turbo.json        # Turborepo task configuration
-├── biome.json        # Root Biome configuration
-├── package.json      # Root workspace configuration
-└── bun.lock          # Bun lockfile
+│   ├── ui/                # Shared UI components and styles
+│   ├── auth/              # Better Auth initialization
+│   ├── types/             # Shared API/domain TypeScript types
+│   ├── biome-config/      # Shared Biome config
+│   └── typescript-config/ # Shared tsconfig presets
+├── turbo.json             # Task graph and caching
+├── package.json           # Root scripts/workspace config
+└── bun.lock               # Dependency lockfile
 ```
 
 ## Apps
 
 ### `apps/web`
 
-The main Next.js application. Uses the App Router with React Compiler enabled.
+Main application users interact with.
 
-- **Port:** 3000
-- **UI:** Imports components from `@repo/ui`
-- **Config:** `next.config.ts`, `tsconfig.json`, `biome.json`
+- Framework: Next.js App Router
+- Primary route groups:
+  - `(landing)` marketing pages
+  - `(auth)` login/register
+  - `dashboard` authenticated user experience
+  - `admin` admin-only management area
+- Calls backend via `NEXT_PUBLIC_API_URL`
+
+### `apps/server`
+
+Express backend for events, reservations, bookings, and admin APIs.
+
+- Auth: Better Auth + bearer plugin
+- DB: MongoDB via Mongoose
+- Background jobs: cleanup cron for expired reservations
+- Route modules:
+  - `routes/events.ts`
+  - `routes/bookings.ts`
+  - `routes/admin.ts`
 
 ### `apps/docs`
+
+Internal documentation portal powered by Fumadocs and MDX.
+
+- Content location: `apps/docs/content/docs`
+- Route rendering: `apps/docs/src/app/docs/[[...slug]]/page.tsx`
+
+## Shared Packages
+
+### `packages/ui`
+
+Reusable component layer consumed by web/docs apps.
+
+- shadcn-style primitives and composites
+- theme tokens and global CSS in `src/styles/globals.css`
+
+### `packages/auth`
+
+Auth bootstrap package wrapping Better Auth initialization.
+
+- centralizes `baseURL`, `trustedOrigins`, social providers, bearer plugin
+
+### `packages/types`
+
+Shared contracts between backend and frontend.
+
+- event, reservation, booking, admin DTOs
+
+## Data and Control Flow
+
+```mermaid
+flowchart LR
+  UI[apps/web] -->|HTTP| API[apps/server]
+  API --> AUTH[packages/auth]
+  API --> DB[(MongoDB)]
+  UI --> TYPES[packages/types]
+  API --> TYPES
+  UI --> UIKIT[packages/ui]
+  DOCS[apps/docs] --> UIKIT
+```
+
+## Tooling and Tasks
+
+| Command | Purpose |
+| --- | --- |
+| `bun dev` | Run workspace dev tasks |
+| `bun run build` | Build all apps/packages |
+| `bun run lint` | Run Biome checks |
+| `bun run typecheck` | TypeScript checks |
+
+Turborepo handles dependency-aware task ordering and caching.
 
 Documentation site powered by [Fumadocs](https://fumadocs.dev). Content is written in MDX files under `content/docs/`.
 

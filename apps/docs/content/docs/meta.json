@@ -1,9 +1,13 @@
 {
-  "title": "Documentation",
+  "title": "TicketFlow Docs",
   "pages": [
     "---Overview---",
     "index",
     "project-structure",
+    "backend-architecture",
+    "frontend-architecture",
+    "routes-and-flows",
+    "deployment",
     "---Reference---",
     "ui-package"
   ]

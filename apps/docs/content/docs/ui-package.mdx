@@ -1,46 +1,88 @@
 ---
 title: UI Package
-description: Using the shared component library across apps.
+description: How TicketFlow uses the shared `@repo/ui` design system.
 ---
 
 ## Overview
 
-The `@repo/ui` package is a shared React component library built on [shadcn/ui](https://ui.shadcn.com). It provides accessible, customizable components that work across all apps in the monorepo.
+`@repo/ui` is the shared component and styling layer for TicketFlow.
 
-## Available Components
+- Reused by `apps/web` and `apps/docs`
+- Built around shadcn-style components
+- Provides theme tokens, utility helpers, and composed UI primitives
 
-### Button
+## Core Principles
 
-A versatile button component with multiple variants and sizes.
+1. Keep visual primitives centralized.
+2. Reuse typed components across apps.
+3. Keep styling token-driven (`--background`, `--primary`, etc.).
+4. Prefer composition (`Card`, `Field`, `Alert`, `Table`) over one-off markup.
+
+## Common Imports
 
 ```tsx
 import { Button } from "@repo/ui/components/button";
-
-export function Example() {
-  return (
-    <div className="flex gap-2">
-      <Button>Default</Button>
-      <Button variant="secondary">Secondary</Button>
-      <Button variant="outline">Outline</Button>
-      <Button variant="ghost">Ghost</Button>
-      <Button variant="destructive">Destructive</Button>
-      <Button variant="link">Link</Button>
-    </div>
-  );
-}
+import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/card";
+import { Input } from "@repo/ui/components/input";
+import { cn } from "@repo/ui/lib/utils";
 ```
 
-**Props:**
+## Theming
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `variant` | `default \| secondary \| outline \| ghost \| destructive \| link` | `default` | Visual style |
-| `size` | `default \| xs \| sm \| lg \| icon` | `default` | Size preset |
-| `asChild` | `boolean` | `false` | Merge props onto child element |
+Global CSS tokens live in:
 
-### Card
+- `packages/ui/src/styles/globals.css`
 
-A composable card component for grouping related content.
+The web app enables runtime light/dark mode via `next-themes` in:
+
+- `apps/web/src/components/theme-provider.tsx`
+- `apps/web/src/components/mode-toggle.tsx`
+
+## Component Categories
+
+### Form and input
+
+- `field`, `form`, `input`, `select`, `textarea`
+
+### Data display
+
+- `card`, `table`, `badge`, `avatar`, `skeleton`, `empty`
+
+### Navigation and overlays
+
+- `dropdown-menu`, `sheet`, `dialog`, `tooltip`
+
+### Feedback
+
+- `alert`, `sonner`, progress/loading states
+
+## Usage in TicketFlow Features
+
+1. Auth pages use `Card`, `Field`, and `ShimmerButton`.
+2. Dashboard pages use `PageHeader`, `Card`, `Empty`, and `Alert`.
+3. Booking flow uses `Card`, `Alert`, `Skeleton`, and action buttons.
+4. Admin views use `Table`, `Badge`, `Card`, and forms.
+
+## Adding Components
+
+From `packages/ui`, add new primitives with shadcn tooling and keep exports aligned:
+
+```tsx
+cd packages/ui
+bunx shadcn@latest add dialog
+```
+
+## Transpile Configuration
+
+Apps that consume `@repo/ui` must transpile it in Next config:
+
+```ts
+const nextConfig = {
+  transpilePackages: ["@repo/ui"],
+};
+```
+
+This keeps package code reusable without a separate build step.
 
 ```tsx
 import {

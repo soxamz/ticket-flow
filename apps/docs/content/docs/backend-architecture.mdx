@@ -1,0 +1,102 @@
+---
+title: Backend Architecture
+description: How the Express API, auth layer, and reservation lifecycle work.
+---
+
+## Overview
+
+The backend lives in `apps/server` and is responsible for:
+
+- authentication and session resolution
+- event catalog and seat availability
+- reservation holds and booking confirmation
+- admin management endpoints
+- periodic cleanup of expired reservations
+
+## Runtime and Entry Point
+
+- Runtime: Bun
+- Framework: Express
+- Entry: `apps/server/src/index.ts`
+
+Startup sequence:
+
+1. Load environment variables.
+2. Connect to MongoDB.
+3. Initialize Better Auth via `@repo/auth`.
+4. Mount auth and API routes.
+5. Start cleanup cron and listen on `PORT`.
+
+## Route Surface
+
+Mounted routes in `index.ts`:
+
+- `/api/auth/*` via Better Auth node handler
+- `/api/events` event browsing and seat data
+- `/api/reserve` and `/api/reservations` reservation lifecycle
+- `/api/bookings` booking lifecycle
+- `/api/admin` admin-only operations
+
+## Auth and Authorization
+
+Auth is initialized in `packages/auth/src/auth.ts`.
+
+Key configuration:
+
+- `baseURL` from `BETTER_AUTH_URL`
+- `trustedOrigins` from `FRONTEND_URL` and `FRONTEND_ORIGINS`
+- email/password auth enabled
+- optional Google/GitHub social providers
+- `bearer()` plugin enabled for token-based API access
+
+Middleware in `apps/server/src/middleware/auth.ts` enforces:
+
+- signed-in access (`authMiddleware`)
+- admin-only access (`adminMiddleware`)
+
+## Data Model (Conceptual)
+
+Main domain entities:
+
+- `Event`
+- `Seat`
+- `Reservation` (temporary hold)
+- `Booking` (confirmed purchase)
+- `User`
+
+Shared API types are published from `packages/types` and consumed by both web and server.
+
+## Reservation and Booking Lifecycle
+
+1. Client chooses seats for an event.
+2. `POST /api/reserve` creates a time-bound reservation.
+3. Client confirms reservation with `POST /api/bookings`.
+4. Reservation becomes booking; seats become booked.
+5. Expired reservations are cleaned by scheduled job.
+
+## Error Handling
+
+The API uses centralized Express error handling and returns JSON error payloads.
+
+Frontend maps API failures into user-facing alerts/toasts.
+
+## Configuration
+
+Common server env vars:
+
+- `PORT`
+- `MONGODB_URI`
+- `BETTER_AUTH_SECRET`
+- `BETTER_AUTH_URL`
+- `FRONTEND_URL`
+- `FRONTEND_ORIGINS` (comma-separated, optional)
+
+## Deployment Notes
+
+Recommended production setup:
+
+- Backend: Render
+- Database: MongoDB Atlas
+- Frontend: Vercel
+
+Ensure the backend trusted origins include deployed frontend domains.

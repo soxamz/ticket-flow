@@ -1,66 +1,80 @@
 ---
-title: Getting Started
-description: Set up and run the Next Turbo Starter template.
+title: TicketFlow Documentation
+description: Complete guide to the TicketFlow architecture, routes, and booking flows.
 ---
 
-## Prerequisites
+TicketFlow is a full-stack ticketing platform built in a Turborepo monorepo.
 
-- [Bun](https://bun.sh) v1.3+ (runtime and package manager)
-- [Node.js](https://nodejs.org) v18+ (required by Next.js)
-- [Git](https://git-scm.com)
+This documentation explains how the application works end-to-end:
 
-## Quick Start
+- frontend architecture and route groups
+- backend architecture and API layers
+- authentication and authorization behavior
+- reservation and booking lifecycle
+- deployment setup for Render (API) and Vercel (web)
 
-Clone the repository and install dependencies:
+## Stack Overview
 
-```bash
-git clone https://github.com/your-username/next-turbo-starter.git
-cd next-turbo-starter
-bun install
+| Layer | Technology |
+| --- | --- |
+| Monorepo | Turborepo + Bun workspaces |
+| Frontend | Next.js App Router (`apps/web`) |
+| Backend | Express + Better Auth + Mongoose (`apps/server`) |
+| Database | MongoDB Atlas |
+| Shared packages | `@repo/ui`, `@repo/types`, `@repo/auth` |
+
+## Application Topology
+
+```mermaid
+flowchart LR
+	U[Browser]
+	W[apps/web\nNext.js]
+	A[apps/server\nExpress API]
+	D[(MongoDB)]
+
+	U --> W
+	W -->|REST + Auth| A
+	A --> D
 ```
 
-Start all apps in development mode:
+## Local Development
+
+### Prerequisites
+
+- Bun 1.3+
+- Node.js 18+
+- MongoDB connection string
+
+### Install and run
 
 ```bash
+git clone https://github.com/soxamz/ticket-flow.git
+cd ticket-flow
+bun install
 bun dev
 ```
 
-This runs both apps simultaneously:
+### Default local URLs
 
-| App  | URL                    | Description        |
-| ---- | ---------------------- | ------------------ |
-| web  | http://localhost:3000   | Main application   |
-| docs | http://localhost:3001   | Documentation site |
+| Service | URL |
+| --- | --- |
+| Web app | http://localhost:3000 |
+| Docs app | http://localhost:3001 |
+| API server | http://localhost:4000 |
 
-## Run a Single App
+## Read Next
 
-```bash
-bunx turbo run dev --filter=web
-bunx turbo run dev --filter=docs
-```
+- [Project Structure](./project-structure)
+- [Backend Architecture](./backend-architecture)
+- [Frontend Architecture](./frontend-architecture)
+- [Routes and Booking Flows](./routes-and-flows)
+- [Deployment Guide](./deployment)
 
-## Available Scripts
-
-All scripts are run from the **root** of the monorepo:
-
-| Script          | Description                              |
-| --------------- | ---------------------------------------- |
-| `bun dev`       | Start all apps in development mode       |
-| `bun run build` | Build all apps and packages              |
-| `bun run lint`  | Lint all apps and packages with Biome    |
-| `bun run format`| Format all files with Biome              |
-| `bun run typecheck` | Run TypeScript type checking         |
-
-## Environment Variables
-
-Create `.env.local` files inside each app that needs them:
+## Scripts
 
 ```bash
-# apps/docs/.env.local
-NEXT_PUBLIC_SITE_URL=https://docs.example.com
-NEXT_PUBLIC_GITHUB_REPO=your-username/next-turbo-starter
+bun dev
+bun run build
+bun run lint
+bun run typecheck
 ```
-
-> [!NOTE]
-> Environment files live **inside each app**, not at the monorepo root.
-> This follows Turborepo best practices for cache correctness.

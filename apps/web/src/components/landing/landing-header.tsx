@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ModeToggle } from "@/components/mode-toggle";
+import { DOCS_URL } from "@/lib/docs-url";
 
 export function LandingHeader() {
   const [scrolled, setScrolled] = useState(false);
@@ -50,6 +51,9 @@ export function LandingHeader() {
             className="hover:text-foreground transition-colors"
           >
             How it Works
+          </a>
+          <a href="#docs" className="hover:text-foreground transition-colors">
+            Docs
           </a>
         </nav>
         <div className="flex items-center gap-4">

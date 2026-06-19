@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { DOCS_URL } from "@/lib/docs-url";
 
 export function LandingFooter() {
   return (
@@ -14,16 +15,41 @@ export function LandingFooter() {
               height={24}
               className="size-6 grayscale opacity-80"
             />
-            <span className="font-semibold text-muted-foreground">TicketFlow</span>
+            <span className="font-semibold text-muted-foreground">
+              TicketFlow
+            </span>
           </div>
-          
+
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link href="/login" className="hover:text-foreground transition-colors">Sign In</Link>
-            <Link href="/register" className="hover:text-foreground transition-colors">Register</Link>
-            <Link href="/dashboard" className="hover:text-foreground transition-colors">Browse Events</Link>
+            <Link
+              href="/login"
+              className="hover:text-foreground transition-colors"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/register"
+              className="hover:text-foreground transition-colors"
+            >
+              Register
+            </Link>
+            <Link
+              href="/dashboard"
+              className="hover:text-foreground transition-colors"
+            >
+              Browse Events
+            </Link>
+            <Link
+              href={DOCS_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-foreground transition-colors"
+            >
+              Docs
+            </Link>
           </div>
         </div>
-        
+
         <div className="mt-8 pt-8 border-t border-border/50 text-center text-sm text-muted-foreground/60">
           <p>© {new Date().getFullYear()} TicketFlow. All rights reserved.</p>
         </div>
