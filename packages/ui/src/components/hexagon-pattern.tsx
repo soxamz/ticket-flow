@@ -48,6 +48,13 @@ interface HexagonPatternProps extends React.SVGProps<SVGSVGElement> {
 
 type HexPoint = readonly [number, number];
 
+const COORD_PRECISION = 6;
+
+function formatCoord(value: number): string {
+	const normalized = Math.abs(value) < 1e-9 ? 0 : value;
+	return Number(normalized.toFixed(COORD_PRECISION)).toString();
+}
+
 function hexVertexList(
 	cx: number,
 	cy: number,
@@ -68,14 +75,14 @@ function hexPoints(
 	direction: "horizontal" | "vertical",
 ): string {
 	return hexVertexList(cx, cy, r, direction)
-		.map(([px, py]) => `${px},${py}`)
+		.map(([px, py]) => `${formatCoord(px)},${formatCoord(py)}`)
 		.join(" ");
 }
 
 function edgeLexKey(a: HexPoint, b: HexPoint): string {
 	const [p, q] =
 		a[0] < b[0] || (a[0] === b[0] && a[1] <= b[1]) ? [a, b] : [b, a];
-	return `${p[0].toFixed(6)},${p[1].toFixed(6)}|${q[0].toFixed(6)},${q[1].toFixed(6)}`;
+	return `${formatCoord(p[0])},${formatCoord(p[1])}|${formatCoord(q[0])},${formatCoord(q[1])}`;
 }
 
 function collectUniqueHexEdges(
@@ -90,6 +97,7 @@ function collectUniqueHexEdges(
 		for (let i = 0; i < 6; i++) {
 			const a = verts[i];
 			const b = verts[(i + 1) % 6];
+			if (!a || !b) continue;
 			const key = edgeLexKey(a, b);
 			if (!seen.has(key)) {
 				seen.add(key);
@@ -270,10 +278,10 @@ export function HexagonPattern({
 								<line
 									className="fill-none"
 									key={edgeLexKey(a, b)}
-									x1={a[0]}
-									x2={b[0]}
-									y1={a[1]}
-									y2={b[1]}
+									x1={formatCoord(a[0])}
+									x2={formatCoord(b[0])}
+									y1={formatCoord(a[1])}
+									y2={formatCoord(b[1])}
 									strokeDasharray={strokeDasharray}
 								/>
 							))}

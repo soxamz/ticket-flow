@@ -54,7 +54,7 @@ export function LoginView() {
 
     try {
       await login(values.email, values.password);
-      const redirect = searchParams.get("redirect") ?? "/";
+      const redirect = searchParams.get("redirect") ?? "/dashboard";
       router.push(redirect);
     } catch (err) {
       setServerError(

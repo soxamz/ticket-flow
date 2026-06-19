@@ -49,7 +49,7 @@ export function RegisterView() {
 
     try {
       await registerUser(values.email, values.password);
-      router.push("/");
+      router.push("/dashboard");
     } catch (err) {
       form.setError("root", {
         type: "server",

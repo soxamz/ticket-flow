@@ -77,11 +77,11 @@ function ReservationContent() {
     setConfirming(true);
     try {
       const booking = await api.confirmBooking(reservationId);
-      router.push(`/booking/${booking.bookingId}`);
+      router.push(`/dashboard/booking/${booking.bookingId}`);
     } catch (err) {
       if (isExpiredError(err)) {
         setExpired(true);
-        router.push(`/booking/${reservationId}?expired=1`);
+        router.push(`/dashboard/booking/${reservationId}?expired=1`);
       } else {
         toast.error("Booking failed", {
           description:
@@ -99,7 +99,7 @@ function ReservationContent() {
     setCancelling(true);
     try {
       await api.cancelReservation(reservationId);
-      router.push("/");
+      router.push("/dashboard");
     } catch {
       toast.error("Failed to cancel reservation", {
         description: "Refresh the page and try again.",

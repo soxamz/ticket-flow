@@ -69,7 +69,7 @@ export default function EventDetailPage() {
     try {
       const response = await api.reserve(eventId, selected);
       router.push(
-        `/reservation/${response.reservationId}?expiresAt=${encodeURIComponent(response.expiresAt)}`,
+        `/dashboard/reservation/${response.reservationId}?expiresAt=${encodeURIComponent(response.expiresAt)}`,
       );
     } catch (err) {
       if (isReserveConflict(err)) {

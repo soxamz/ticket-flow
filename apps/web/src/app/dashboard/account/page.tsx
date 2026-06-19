@@ -215,7 +215,7 @@ export default function AccountPage() {
               </EmptyDescription>
             </EmptyHeader>
             <Button type="button" variant="outline" asChild>
-              <Link href="/">Browse events</Link>
+              <Link href="/dashboard">Browse events</Link>
             </Button>
           </Empty>
         )}

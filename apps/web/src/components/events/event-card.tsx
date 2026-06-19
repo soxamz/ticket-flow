@@ -13,7 +13,7 @@ interface EventCardProps {
 export function EventCard({ event, className }: EventCardProps) {
   return (
     <Link
-      href={`/events/${event._id}`}
+      href={`/dashboard/events/${event._id}`}
       className={cn(
         "group relative block aspect-[3/4] overflow-hidden rounded-xl shadow-sm",
         className,

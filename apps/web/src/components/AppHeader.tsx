@@ -5,6 +5,7 @@ import { Separator } from "@repo/ui/components/separator";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ModeToggle } from "@/components/mode-toggle";
 import { useAuth } from "@/context/AuthContext";
 
 export function AppHeader() {
@@ -19,7 +20,7 @@ export function AppHeader() {
   return (
     <header className="border-b bg-card">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex items-center gap-2">
           <Image
             src="/logo.svg"
             alt="TicketFlow"
@@ -37,8 +38,9 @@ export function AppHeader() {
               </Button>
             ) : null}
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/account">Account</Link>
+              <Link href="/dashboard/account">Account</Link>
             </Button>
+            <ModeToggle />
             <Separator orientation="vertical" className="hidden h-4 sm:block" />
             <Button variant="outline" size="sm" onClick={handleLogout}>
               Logout

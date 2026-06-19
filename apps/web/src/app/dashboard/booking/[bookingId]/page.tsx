@@ -84,7 +84,7 @@ function BookingContent() {
         </Card>
 
         <RainbowButton asChild size="lg" className="w-full">
-          <Link href="/">Choose different seats</Link>
+          <Link href="/dashboard">Choose different seats</Link>
         </RainbowButton>
       </div>
     );
@@ -161,7 +161,7 @@ function BookingContent() {
         <CardContent className="flex flex-col gap-3 py-4 sm:flex-row">
           <DownloadTicketButton bookingId={bookingId} />
           <RainbowButton asChild size="lg" className="flex-1">
-            <Link href="/">Back to events</Link>
+            <Link href="/dashboard">Back to events</Link>
           </RainbowButton>
         </CardContent>
       </Card>
