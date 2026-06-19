@@ -9,12 +9,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/card";
+import { Confetti, type ConfettiRef } from "@repo/ui/components/confetti";
 import { RainbowButton } from "@repo/ui/components/rainbow-button";
 import { Skeleton } from "@repo/ui/components/skeleton";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { BookingSummaryCard } from "@/components/BookingSummaryCard";
 import { BookingSteps } from "@/components/booking/booking-steps";
 import { DownloadTicketButton } from "@/components/booking/download-ticket-button";
@@ -30,6 +31,8 @@ function BookingContent() {
   const [booking, setBooking] = useState<BookingDetail | null>(null);
   const [loading, setLoading] = useState(!isExpiredFlow);
   const [error, setError] = useState<string | null>(null);
+  const confettiRef = useRef<ConfettiRef>(null);
+  const hasCelebratedRef = useRef(false);
 
   useEffect(() => {
     if (isExpiredFlow) {
@@ -60,6 +63,55 @@ function BookingContent() {
       cancelled = true;
     };
   }, [bookingId, isExpiredFlow]);
+
+  useEffect(() => {
+    if (isExpiredFlow || loading || !booking || hasCelebratedRef.current) {
+      return;
+    }
+
+    hasCelebratedRef.current = true;
+
+    const count = 200;
+    const defaults = {
+      startVelocity: 30,
+      spread: 360,
+      ticks: 60,
+      zIndex: 100,
+      colors: ["#a786ff", "#fd8bbc", "#eca184", "#f8deb1"],
+    };
+
+    const fire = (particleRatio: number, options: Record<string, number>) => {
+      confettiRef.current?.fire({
+        ...defaults,
+        ...options,
+        particleCount: Math.floor(count * particleRatio),
+      });
+    };
+
+    const timeline = [
+      () => {
+        fire(0.25, { spread: 26, startVelocity: 55 });
+        fire(0.2, { spread: 60 });
+      },
+      () => {
+        fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+      },
+      () => {
+        fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+        fire(0.1, { spread: 120, startVelocity: 45 });
+      },
+    ];
+
+    const timers = timeline.map((burst, index) =>
+      window.setTimeout(burst, index * 220),
+    );
+
+    return () => {
+      for (const timer of timers) {
+        window.clearTimeout(timer);
+      }
+    };
+  }, [booking, loading, isExpiredFlow]);
 
   if (isExpiredFlow) {
     return (
@@ -112,6 +164,12 @@ function BookingContent() {
 
   return (
     <div className="mx-auto max-w-xl space-y-6 pb-8">
+      <Confetti
+        ref={confettiRef}
+        manualstart
+        className="pointer-events-none fixed inset-0 z-50 size-full"
+      />
+
       <BookingSteps current="confirm" />
 
       <Card className="overflow-hidden border-primary/25 bg-linear-to-br from-primary/15 via-card to-violet-950/30 shadow-sm">
