@@ -40,7 +40,15 @@ async function request<T>(path: string, options: RequestInit = {}, withAuth = fa
     if (token) headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const response = await fetch(`${API_URL}${path}`, { ...options, headers });
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${path}`, { ...options, headers });
+  } catch {
+    throw new ApiError(
+      0,
+      `Could not reach the API at ${API_URL}. Check that the server is running and CORS is allowed.`,
+    );
+  }
 
   if (response.status === 204) return undefined as T;
 
@@ -60,11 +68,20 @@ async function request<T>(path: string, options: RequestInit = {}, withAuth = fa
 export const api = {
   // ─── Auth ────────────────────────────────────────────────────────────────
   signIn: async (email: string, password: string) => {
-    const response = await fetch(`${API_URL}/api/auth/sign-in/email`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    let response: Response;
+    try {
+      response = await fetch(`${API_URL}/api/auth/sign-in/email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+    } catch {
+      throw new ApiError(
+        0,
+        `Could not reach the API at ${API_URL}. Check that the server is running and CORS is allowed.`,
+      );
+    }
+
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       throw new ApiError(response.status, data?.message ?? "Sign in failed", data);
@@ -74,11 +91,20 @@ export const api = {
   },
 
   signUp: async (email: string, password: string, name: string) => {
-    const response = await fetch(`${API_URL}/api/auth/sign-up/email`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, name }),
-    });
+    let response: Response;
+    try {
+      response = await fetch(`${API_URL}/api/auth/sign-up/email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name }),
+      });
+    } catch {
+      throw new ApiError(
+        0,
+        `Could not reach the API at ${API_URL}. Check that the server is running and CORS is allowed.`,
+      );
+    }
+
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       throw new ApiError(response.status, data?.message ?? "Sign up failed", data);
@@ -124,7 +150,7 @@ export const api = {
 
   getBooking: (id: string) => request<BookingDetail>(`/api/bookings/${id}`, {}, true),
 
-  getMyBookings: () => request<UserBooking[]>("/api/bookings/me", {}, true),
+  getMyBookings: () => request<UserBooking[]>("/api/bookings", {}, true),
 };
 
 // ─── Internal type for raw Better Auth session user ──────────────────────────

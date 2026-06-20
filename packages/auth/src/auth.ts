@@ -27,6 +27,7 @@ function getTrustedOrigins(): string[] {
       baseUrl,
       "http://localhost:3000",
       "http://localhost:3002",
+      "http://localhost:8082",
       ...parseOrigins(process.env.FRONTEND_ORIGINS),
       ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
     ]),
@@ -90,8 +91,14 @@ export function getAuth(): ReturnType<typeof betterAuth> {
   return authInstance;
 }
 
+type AuthCliProxy = {
+  readonly handler: ReturnType<typeof getAuth>["handler"];
+  readonly api: ReturnType<typeof getAuth>["api"];
+  readonly $Infer: ReturnType<typeof getAuth>["$Infer"];
+};
+
 /** @deprecated Prefer initAuth() + getAuth() — kept for Better Auth CLI config resolution. */
-export const auth = {
+export const auth: AuthCliProxy = {
   get handler() {
     return getAuth().handler;
   },

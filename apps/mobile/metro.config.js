@@ -29,6 +29,14 @@ const FORCED_MODULES = {
   "react-dom": path.join(localModules, "react-dom", "index.js"),
 };
 
+function resolveForcedSubpath(moduleName, packageName) {
+  if (moduleName === packageName) return FORCED_MODULES[packageName];
+  if (!moduleName.startsWith(`${packageName}/`)) return null;
+
+  const subpath = moduleName.slice(packageName.length + 1);
+  return path.join(localModules, packageName, `${subpath}.js`);
+}
+
 const defaultResolveRequest = config.resolver.resolveRequest;
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   if (platform === "web") {
@@ -47,9 +55,12 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
     }
   }
 
-  if (Object.hasOwn(FORCED_MODULES, moduleName)) {
-    return { filePath: FORCED_MODULES[moduleName], type: "sourceFile" };
+  const forcedReactPath = resolveForcedSubpath(moduleName, "react") ?? resolveForcedSubpath(moduleName, "react-dom");
+
+  if (forcedReactPath) {
+    return { filePath: forcedReactPath, type: "sourceFile" };
   }
+
   return defaultResolveRequest
     ? defaultResolveRequest(context, moduleName, platform)
     : context.resolveRequest(context, moduleName, platform);

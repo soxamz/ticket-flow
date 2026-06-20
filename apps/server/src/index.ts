@@ -31,6 +31,7 @@ const allowedOrigins = Array.from(
   new Set([
     "http://localhost:3000",
     "http://localhost:3002",
+    "http://localhost:8082",
     ...parseOrigins(process.env.FRONTEND_ORIGINS),
     ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
   ]),
@@ -50,6 +51,7 @@ app.use(
   cors({
     origin: allowedOrigins,
     credentials: true,
+    exposedHeaders: ["set-auth-token"],
   }),
 );
 

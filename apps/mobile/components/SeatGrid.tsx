@@ -1,4 +1,5 @@
 import type { Seat } from "@repo/types";
+import { useMemo, useState } from "react";
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface SeatGridProps {
@@ -8,10 +9,28 @@ interface SeatGridProps {
   maxSelectable?: number;
 }
 
-const SEAT_SIZE = 36;
 const COLUMNS = 10;
+const SEAT_GAP = 4;
+const MAX_SEAT_SIZE = 40;
+const MIN_SEAT_SIZE = 28;
 
 export function SeatGrid({ seats, selected, onToggle, maxSelectable = 6 }: SeatGridProps) {
+  const [gridWidth, setGridWidth] = useState(0);
+
+  const sortedSeats = useMemo(
+    () =>
+      [...seats].sort((a, b) =>
+        a.seatNumber.localeCompare(b.seatNumber, undefined, { numeric: true, sensitivity: "base" }),
+      ),
+    [seats],
+  );
+
+  const seatSize = useMemo(() => {
+    if (gridWidth <= 0) return MIN_SEAT_SIZE;
+    const totalGap = SEAT_GAP * (COLUMNS - 1);
+    return Math.max(MIN_SEAT_SIZE, Math.min(MAX_SEAT_SIZE, Math.floor((gridWidth - totalGap) / COLUMNS)));
+  }, [gridWidth]);
+
   function getSeatStyle(seat: Seat) {
     if (seat.status === "booked") return styles.seatBooked;
     if (seat.status === "reserved") return styles.seatReserved;
@@ -50,23 +69,31 @@ export function SeatGrid({ seats, selected, onToggle, maxSelectable = 6 }: SeatG
       </View>
 
       {/* Grid */}
-      <FlatList
-        data={seats}
-        keyExtractor={(item) => item._id}
-        numColumns={COLUMNS}
-        scrollEnabled={false}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[styles.seat, getSeatStyle(item)]}
-            onPress={() => handlePress(item)}
-            disabled={item.status !== "available"}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.seatText, getSeatTextStyle(item)]}>{item.seatNumber}</Text>
-          </TouchableOpacity>
-        )}
-        contentContainerStyle={styles.grid}
-      />
+      <View style={styles.gridWrapper} onLayout={(event) => setGridWidth(event.nativeEvent.layout.width)}>
+        <FlatList
+          data={sortedSeats}
+          keyExtractor={(item) => item._id}
+          numColumns={COLUMNS}
+          scrollEnabled={false}
+          renderItem={({ item, index }) => (
+            <TouchableOpacity
+              style={[
+                styles.seat,
+                { width: seatSize, height: seatSize, marginRight: (index + 1) % COLUMNS === 0 ? 0 : SEAT_GAP },
+                getSeatStyle(item),
+              ]}
+              onPress={() => handlePress(item)}
+              disabled={item.status !== "available"}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.seatText, getSeatTextStyle(item)]} numberOfLines={1} adjustsFontSizeToFit>
+                {item.seatNumber}
+              </Text>
+            </TouchableOpacity>
+          )}
+          contentContainerStyle={styles.grid}
+        />
+      </View>
     </View>
   );
 }
@@ -115,13 +142,14 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 3,
   },
-  grid: {
+  gridWrapper: {
+    width: "100%",
     alignItems: "center",
   },
+  grid: {
+    gap: SEAT_GAP,
+  },
   seat: {
-    width: SEAT_SIZE,
-    height: SEAT_SIZE,
-    margin: 2,
     borderRadius: 6,
     justifyContent: "center",
     alignItems: "center",
