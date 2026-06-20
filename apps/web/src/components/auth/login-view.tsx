@@ -21,7 +21,7 @@ import { ShimmerButton } from "@repo/ui/components/shimmer-button";
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useAuth } from "@/context/AuthContext";
@@ -34,7 +34,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginView() {
-  const { login, user, isLoading } = useAuth();
+  const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -49,23 +49,13 @@ export function LoginView() {
 
   const isSubmitting = form.formState.isSubmitting;
 
-  useEffect(() => {
-    if (isLoading || !user) {
-      return;
-    }
-
-    const redirect = searchParams.get("redirect") ?? "/dashboard";
-    router.replace(redirect);
-  }, [isLoading, user, router, searchParams]);
-
   async function onSubmit(values: LoginFormValues) {
     setServerError(null);
 
     try {
       await login(values.email, values.password);
-      const redirect = searchParams.get("redirect") ?? "/dashboard";
-      router.replace(redirect);
-      router.refresh();
+      const redirect = searchParams.get("redirect") ?? "/";
+      router.push(redirect);
     } catch (err) {
       setServerError(
         err instanceof Error ? err.message : "Invalid email or password",

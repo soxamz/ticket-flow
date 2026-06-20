@@ -19,7 +19,6 @@ import { Input } from "@repo/ui/components/input";
 import { ShimmerButton } from "@repo/ui/components/shimmer-button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useAuth } from "@/context/AuthContext";
@@ -32,7 +31,7 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export function RegisterView() {
-  const { register: registerUser, user, isLoading } = useAuth();
+  const { register: registerUser } = useAuth();
   const router = useRouter();
 
   const form = useForm<RegisterFormValues>({
@@ -45,21 +44,12 @@ export function RegisterView() {
 
   const isSubmitting = form.formState.isSubmitting;
 
-  useEffect(() => {
-    if (isLoading || !user) {
-      return;
-    }
-
-    router.replace("/dashboard");
-  }, [isLoading, user, router]);
-
   async function onSubmit(values: RegisterFormValues) {
     form.clearErrors("root");
 
     try {
       await registerUser(values.email, values.password);
-      router.replace("/dashboard");
-      router.refresh();
+      router.push("/");
     } catch (err) {
       form.setError("root", {
         type: "server",

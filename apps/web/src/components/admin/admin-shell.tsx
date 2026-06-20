@@ -52,7 +52,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </nav>
           </div>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard">Back to app</Link>
+            <Link href="/">Back to app</Link>
           </Button>
         </div>
       </header>

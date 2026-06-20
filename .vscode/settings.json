@@ -19,5 +19,9 @@
   },
   "[json]": {
     "editor.defaultFormatter": "biomejs.biome"
+  },
+  "sonarlint.connectedMode.project": {
+    "connectionId": "soxamz",
+    "projectKey": "soxamz_ticket-flow"
   }
 }

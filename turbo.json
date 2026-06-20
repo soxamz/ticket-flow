@@ -18,14 +18,6 @@
     },
     "seed": {
       "cache": false
-    },
-    "android": {
-      "cache": false,
-      "persistent": true
-    },
-    "ios": {
-      "cache": false,
-      "persistent": true
     }
   }
 }

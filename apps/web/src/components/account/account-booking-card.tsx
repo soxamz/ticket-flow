@@ -24,7 +24,7 @@ export function AccountBookingCard({ booking }: AccountBookingCardProps) {
 
   return (
     <Card className="overflow-hidden border-border/60 bg-card/80 transition-colors hover:border-primary/30">
-      <Link href={`/dashboard/booking/${booking._id}`} className="block">
+      <Link href={`/booking/${booking._id}`} className="block">
         <div className="flex flex-col sm:flex-row">
           {booking.event.imageUrl ? (
             <div className="relative aspect-[16/9] w-full shrink-0 sm:aspect-auto sm:h-auto sm:w-40">
